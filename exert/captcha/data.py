@@ -11,7 +11,12 @@ class Captcha:
     验证码。
     '''
 
-    def __init__(self, font_size=28):
+    def __init__(
+        self,
+        font_size=28,
+        charset='2345678abcdefhijkmnpqrstuvwxyz',
+        noise_charset='2345678abcdefhijkmnpqrstuvwxyz'
+    ):
         '''
         初始化。
         '''
@@ -26,6 +31,10 @@ class Captcha:
             font=font_path,
             size=math.ceil(font_size * 0.3)
         )
+        self.charset = charset
+        self.charset_max_index = len(charset) - 1
+        self.noise_charset = noise_charset
+        self.noise_charset_max_index = len(noise_charset) - 1
 
     def save(self, text, path):
         '''
@@ -69,12 +78,11 @@ class Captcha:
         生成干扰背景字符。
         '''
 
-        codeset = '2345678abcdefhijkmnpqrstuvwxyz'
-        code_index_max = len(codeset) - 1
         w = image.size[0] - 1
         h = image.size[1] - 1
         for _ in range(100):
-            code = codeset[random.randint(0, code_index_max)]
+            ri = random.randint(0, self.noise_charset_max_index)
+            code = self.noise_charset[ri]
             ci = self.draw_code(code, self.noise_font, self.random_rgba())
             x = random.randint(0, w)
             y = random.randint(0, h)
@@ -83,17 +91,15 @@ class Captcha:
             image = Image.alpha_composite(image, temp)
         return image
 
-    @staticmethod
-    def roll_text(length=6, codeset='2345678abcdefhijkmnpqrstuvwxyz'):
+    def roll_text(self, length=6):
         '''
         随机生成。
         '''
 
         result = []
-        code_index_max = len(codeset) - 1
         for _ in range(length):
-            i = random.randint(0, code_index_max)
-            result.append(codeset[i])
+            i = random.randint(0, self.charset_max_index)
+            result.append(self.charset[i])
         return ''.join(result)
 
     @staticmethod
