@@ -1,6 +1,8 @@
 import os
 import math
 import random
+import glob
+import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 
 
@@ -134,3 +136,55 @@ class Captcha:
         b = random.randint(0, 255)
         a = random.randint(0, 255) if alpth == None else alpth
         return (r, g, b, a)
+
+
+class CaptchaAssets:
+    '''
+    验证码数据集
+    '''
+
+    def __init__(self, folder, text_length=6, charset='2345678abcdefhijkmnpqrstuvwxyz'):
+        '''
+        初始化数据集。
+        '''
+
+        self.paths = glob.glob(f'{folder}/*.png')
+        self.path_count = len(self.paths)
+        self.path_max_index = self.path_count - 1
+        self.text_length = text_length
+        self.charset = charset
+        self.charset_count = len(charset)
+        self.charset_map = {}
+        for i, c in enumerate(charset):
+            self.charset_map[c] = i
+
+    def get_one(self):
+        '''
+        随机加载一组数据。
+        '''
+
+        i = random.randint(0, self.path_max_index)
+        p = self.paths[i]
+        ir = np.array(Image.open(p))
+        code = p.split('-')[1].split('.')[0]
+        cr = np.zeros([self.text_length, self.charset_count])
+        for i, c in enumerate(code):
+            ci = self.charset_map[c]
+            cr[i][ci] = 1
+        return cr, ir
+
+    def get_batch(self, batch_size=64):
+        '''
+        随机选取一组训练数据。
+        '''
+
+        code, image = self.get_one()
+        x = np.zeros([batch_size, image.shape[0],
+                      image.shape[1], image.shape[2]])
+        y = np.zeros([batch_size, self.text_length, self.charset_count])
+
+        for i in range(batch_size):
+            code, image = self.get_one()
+            x[i, :] = image
+            y[i, :] = code
+        return x, y
