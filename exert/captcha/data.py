@@ -173,7 +173,7 @@ class CaptchaAssets:
         p = self.paths[i]
         ir = np.array(Image.open(p))
         code = p.split('-')[1].split('.')[0]
-        cr = np.zeros([self.text_length, self.charset_count])
+        cr = np.zeros([self.text_length, self.charset_count], dtype='float32')
         for i, c in enumerate(code):
             ci = self.charset_map[c]
             cr[i][ci] = 1
