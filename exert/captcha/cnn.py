@@ -2,6 +2,7 @@ import math
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+from loguru import logger
 
 
 class CaptchaCnnModel(keras.Model):
@@ -59,11 +60,13 @@ class CaptchaCnnLv1Layer(layers.Layer):
         self.w_alpha = kws['w_alpha'] if 'w_alpha' in kws else 0.01
         self.b_alpha = kws['b_alpha'] if 'b_alpha' in kws else 0.1
         self.droprate = kws['droprate'] if 'droprate' in kws else 0.5
+        self.w = tf.Variable(self.w_alpha * tf.random.normal((5, 5, 4, 32)))
+        self.b = tf.Variable(self.b_alpha * tf.random.normal((32,)))
 
     def build(self, input_shape):
         '''
         '''
-
+        logger.info(f'lv1: {input_shape}')
         self.w = tf.Variable(self.w_alpha * tf.random.normal((5, 5, 4, 32)))
         self.b = tf.Variable(self.b_alpha * tf.random.normal((32,)))
 
@@ -101,7 +104,7 @@ class CaptchaCnnLv2Layer(layers.Layer):
     def build(self, input_shape):
         '''
         '''
-
+        logger.info(f'lv2: {input_shape}')
         self.w = tf.Variable(self.w_alpha * tf.random.normal((5, 5, 32, 64)))
         self.b = tf.Variable(self.b_alpha * tf.random.normal((64,)))
 
@@ -140,6 +143,7 @@ class CaptchaCnnLv3Layer(layers.Layer):
         '''
         '''
 
+        logger.info(f'lv3: {input_shape}')
         self.w = tf.Variable(self.w_alpha * tf.random.normal((5, 5, 64, 64)))
         self.b = tf.Variable(self.b_alpha * tf.random.normal((64,)))
 
@@ -179,6 +183,7 @@ class CaptchaCnnDenseLayer(layers.Layer):
         '''
         '''
 
+        logger.info(f'dense: {input_shape}')
         self.w = tf.Variable(
             self.w_alpha * tf.random.normal(
                 (self.input_height * self.input_width * 64, 1024)
@@ -217,6 +222,7 @@ class CaptchaCnnOutputLayer(layers.Layer):
         '''
         '''
 
+        logger.info(f'output: {input_shape}')
         self.w = tf.Variable(
             self.w_alpha * tf.random.normal(
                 (1024, self.max_captcha * self.charset_length)

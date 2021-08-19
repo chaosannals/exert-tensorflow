@@ -14,6 +14,7 @@ IMAGE_HEIGHT = 56
 IMAGE_WIDTH = 202
 MAX_CAPTCHA = 6
 CHARSET_LENGTH = len('2345678abcdefhijkmnpqrstuvwxyz')
+M_PATH = './premodel/captcha/'
 
 model = CaptchaCnnModel(
     IMAGE_HEIGHT,
@@ -78,11 +79,11 @@ def train():
         loss = train_step(x, y)
         epoch += 1
         if epoch % 10 == 0:
-            tx, ty = assets.get_batch()
+            tx, ty = assets.get_batch(100)
             acc = train_accuracy(tx, ty)
             logger.info(f'accuracy: {acc}')
-            if acc > 0.7:
-                
+            if acc > 0.8:
+                model.save(M_PATH)
                 break
         logger.info(f'epoch: {epoch} loss: {loss}')
 
